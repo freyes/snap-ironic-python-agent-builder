@@ -1,0 +1,47 @@
+name: ironic-python-agent-builder
+base: core20
+summary: Tools and scripts to build a deployment, cleaning or inspection ramdisk based.
+description: |
+  Tools and scripts to build a deployment, cleaning or inspection ramdisk
+  based on Ironic Python Agent.
+
+adopt-info: ironic-python-agent-builder
+confinement: strict
+
+apps:
+  ironic-python-agent-builder:
+    command: bin/ironic-python-agent-builder
+    plugs:
+      - home
+
+parts:
+  ironic-python-agent-builder:
+    plugin: python
+    source: https://github.com/openstack/ironic-python-agent-builder.git
+    stage-packages:
+      # diskimage-builder dependencies
+      - dpkg
+      - squashfs-tools
+      - gnupg2
+      - bzip2
+      - util-linux
+      - dosfstools
+      - gdisk
+      - kpartx
+      - sudo
+      - curl
+      - git
+      - apt-transport-https
+      - inetutils-ping
+      - qemu-utils
+      - rpm
+      - uuid-runtime
+      - debootstrap
+      - procps
+
+    override-pull: |
+      snapcraftctl pull
+      version="$(git describe --tags --always --dirty)"
+      [ -n "$(echo $version | grep '-')" ] && grade=devel || grade=stable
+      snapcraftctl set-version "$version"
+      snapcraftctl set-grade "$grade"
